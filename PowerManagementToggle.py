@@ -1,5 +1,4 @@
 import os
-from pyautogui import *
 import pyautogui 
 import time
 import keyboard
@@ -11,6 +10,8 @@ import win32api, win32con
 ## 1200 150 , 1220 300  # To open control panel
 
 # Update: 18/12/2021, Made it more consistent so it requires no human intervention, optimized a little more
+
+#Update : 5/2/2021, Made it check for icons repeatedly, fixed crashing 
 
 ## 776 419,  240 240 240 To scroll down
 
@@ -40,7 +41,7 @@ def FindPowerSettings(x):
                     try:
                         Found2 = False
                         while(Found2 == False):
-                            if pyautogui.pixel(556,431)[0] == 120 and pyautogui.pixel(556,431)[1] == 185 and pyautogui.pixel(556,431)[2] == 4:
+                            if  (pyautogui.locateOnScreen('OpenSetting.png', confidence = 0.85)):
                                 Found2 = True
                                 if(x == 1): ClickOnPosition(750, 430)
                                 elif (x == 2): ClickOnPosition(750, 450)  
@@ -70,17 +71,24 @@ def ClickOnPosition(x,y):
 
 
 def OpenCtrlPanel():
-    win32api.SetCursorPos((1200,150))
-    win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN,0,0)
-    time.sleep(0.01)
-    win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP,0,0)
-    time.sleep(0.25)
-    PanelLocation = pyautogui.locateOnScreen('CtrlPnl.png', confidence = 0.85)
-    win32api.SetCursorPos((PanelLocation[0],PanelLocation[1]))
-    time.sleep(0.5)
-    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,0,0)
-    time.sleep(0.011)
-    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,0,0)
+    openpanel = False
+    foundpanel = False
+    while(openpanel == False):
+        win32api.SetCursorPos((1200,150))
+        win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN,0,0)
+        time.sleep(0.5)
+        win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP,0,0)
+        time.sleep(0.25)
+        openpanel = True
+    while(foundpanel ==False):
+        PanelLocation = pyautogui.locateOnScreen('CtrlPnl.png', confidence = 0.85)
+        if (PanelLocation[1] != 0): 
+            win32api.SetCursorPos((PanelLocation[0],PanelLocation[1]))
+            time.sleep(0.5)
+            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,0,0)
+            time.sleep(0.011)
+            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,0,0)
+            foundpanel = True
 
 while (ISenabled == True):
     e = input("Type s for Saving, b for Balanced, p for Performance, N to cancel: ")
@@ -89,13 +97,8 @@ while (ISenabled == True):
         PowerSetting(1)
     elif (e== 'b' or e == 'B'): 
         os.startfile('Balanced.cmd')
-        PowerSetting(2)
+        PowerSetting(2)          
     elif (e=='p' or e == 'P'): 
         os.startfile('Performance.cmd')
         PowerSetting(3)
     elif (e=='n' or e == 'N'): On = False
-
-
-
-
-
