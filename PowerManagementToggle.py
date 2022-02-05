@@ -3,7 +3,7 @@ import pyautogui
 import time
 import keyboard
 import win32api, win32con
-
+import pickle
 
 #This program was written in a few hours, its purpose is to set the computer's power usage.
 # Disclaimer: This is an awful way to do it, even the cmds, a better way would be NViAPI but I dont want to use it
@@ -11,8 +11,8 @@ import win32api, win32con
 
 # Update: 18/12/2021, Made it more consistent so it requires no human intervention, optimized a little more
 
-#Update : 5/2/2021, Made it check for icons repeatedly, fixed crashing 
-
+#Update : 5/2/2022, Made it check for icons repeatedly, fixed crashing 
+#Update 6/2/2022, added pickling to remember the current power setting
 ## 776 419,  240 240 240 To scroll down
 
 ## 750 419 To click the menu
@@ -91,14 +91,28 @@ def OpenCtrlPanel():
             foundpanel = True
 
 while (ISenabled == True):
+    CurrentState = "Unknown"
+    filename = 'CurrentState.pk'
+    with open(filename,'rb') as fi:
+        CurrentState = pickle.load(fi)
+    print("Current Power State is : " + CurrentState)
     e = input("Type s for Saving, b for Balanced, p for Performance, N to cancel: ")
     if(e == 's' or e == 'S'): 
+        CurrentState = "Saving"
+        with open(filename, 'wb') as fi:
+            pickle.dump(CurrentState,fi)
         os.startfile('PowerSaver.cmd') 
         PowerSetting(1)
     elif (e== 'b' or e == 'B'): 
+        CurrentState = "Balanced"
+        with open(filename, 'wb') as fi:
+            pickle.dump(CurrentState,fi)
         os.startfile('Balanced.cmd')
         PowerSetting(2)          
     elif (e=='p' or e == 'P'): 
+        CurrentState = "Performance"
+        with open(filename, 'wb') as fi:
+            pickle.dump(CurrentState,fi)
         os.startfile('Performance.cmd')
         PowerSetting(3)
     elif (e=='n' or e == 'N'): On = False
